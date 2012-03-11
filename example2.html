@@ -39,6 +39,19 @@
 				-webkit-perspective: 1000;
 				-webkit-backface-visibility: hidden;
 			}
+
+			#indic {
+				position:absolute;
+				top:30px;
+				right:5px;
+				width:50px;
+				height:20px;
+				border-radius:8px;
+				border:solid 1px #666;
+				background:#eee;
+				text-align:center;
+			}
+
 		</style>
 	</head>
 	<body>
@@ -53,15 +66,29 @@
 				<p>Cras auctor eros vitae elit lobortis fringilla. Etiam feugiat fermentum ligula, id adipiscing diam porttitor ut. Cras sodales dolor nec nunc rutrum id consequat velit feugiat. Nullam ante felis, tempus non varius vitae, posuere sed lacus. In dui nulla, egestas et vestibulum id, vehicula id nulla. Curabitur sed tristique dolor. Curabitur ut tortor a arcu molestie cursus.</p>
 				<p>Aliquam in lacus arcu, ut aliquam nulla. Suspendisse in ipsum dolor. Duis semper dapibus nisi ut auctor. Suspendisse et massa felis. Quisque gravida, lacus ut fermentum adipiscing, ligula arcu porta risus, ac volutpat nibh purus sit amet ipsum. In hac habitasse platea dictumst. Maecenas eget congue nunc. Phasellus quis mi velit. Pellentesque sit amet orci velit. Vivamus sed nulla lacus.</p>
 				<p>Aenean in purus aliquam quam pellentesque venenatis sed fermentum nisl. Praesent eget leo lorem, et laoreet quam. Donec volutpat quam mauris, nec vestibulum felis. Donec ac sem mi, a malesuada elit. Suspendisse sit amet quam ligula, a laoreet diam. Nulla cursus, tellus mattis molestie ultrices, augue nisi aliquam tellus, sed luctus mauris magna eu sem. Cras at erat elit, at placerat sapien. Suspendisse vestibulum dapibus vestibulum. Praesent semper, tellus sed mattis ullamcorper, nisl mi viverra urna, eget euismod ante nisl vel nisi. Nulla quis enim arcu. Maecenas vel quam turpis. Donec convallis ultricies elit, eget cursus magna auctor non. Etiam ut lacus at orci molestie condimentum. Sed ac leo nisl, ut pretium eros.</p>
+				<p>Cras auctor eros vitae elit lobortis fringilla. Etiam feugiat fermentum ligula, id adipiscing diam porttitor ut. Cras sodales dolor nec nunc rutrum id consequat velit feugiat. Nullam ante felis, tempus non varius vitae, posuere sed lacus. In dui nulla, egestas et vestibulum id, vehicula id nulla. Curabitur sed tristique dolor. Curabitur ut tortor a arcu molestie cursus.</p>
+				<p>Aliquam in lacus arcu, ut aliquam nulla. Suspendisse in ipsum dolor. Duis semper dapibus nisi ut auctor. Suspendisse et massa felis. Quisque gravida, lacus ut fermentum adipiscing, ligula arcu porta risus, ac volutpat nibh purus sit amet ipsum. In hac habitasse platea dictumst. Maecenas eget congue nunc. Phasellus quis mi velit. Pellentesque sit amet orci velit. Vivamus sed nulla lacus.</p>
+				<p>Aenean in purus aliquam quam pellentesque venenatis sed fermentum nisl. Praesent eget leo lorem, et laoreet quam. Donec volutpat quam mauris, nec vestibulum felis. Donec ac sem mi, a malesuada elit. Suspendisse sit amet quam ligula, a laoreet diam. Nulla cursus, tellus mattis molestie ultrices, augue nisi aliquam tellus, sed luctus mauris magna eu sem. Cras at erat elit, at placerat sapien. Suspendisse vestibulum dapibus vestibulum. Praesent semper, tellus sed mattis ullamcorper, nisl mi viverra urna, eget euismod ante nisl vel nisi. Nulla quis enim arcu. Maecenas vel quam turpis. Donec convallis ultricies elit, eget cursus magna auctor non. Etiam ut lacus at orci molestie condimentum. Sed ac leo nisl, ut pretium eros.</p>
 				<p>The end.</p>
 			</nav>
 		</section>
+
+		<div id="indic">0%</div>
+
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
 		<script src="touch-scroll.min.js"></script>
 		<script>
-			$(document).ready(function() {
+
+			function syncScroll(scroll, maxScroll, viewHeight) {
+				$('#indic')
+					.css('top', 30 + (viewHeight - 22) * scroll / maxScroll)
+					.html(Math.round(100 * scroll / maxScroll) + "%");
+			}
+
+			$(document).ready(function() 
+			{
 				if (!!('ontouchstart' in window)) {
-					$('nav').touchScroll();
+					$('nav').touchScroll({ onScroll: syncScroll });
 				}
 			});
 		</script>

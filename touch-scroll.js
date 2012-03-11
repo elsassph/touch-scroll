@@ -13,7 +13,8 @@
 		momentumTime: 300,
 		iPadMomentumDamp: 0.95,
 		iPadMomentumTime: 1200,
-		touchTags: ['select', 'input', 'textarea']
+		touchTags: ['select', 'input', 'textarea'],
+		onScroll:null
 	};
 	
 	// Define methods
@@ -45,8 +46,12 @@
 					timeoutID,
 					isiPad = !!navigator.platform.match(/ipad/i),
 					hasMatrix = 'WebKitCSSMatrix' in window,
-					has3d = hasMatrix && 'm11' in new WebKitCSSMatrix();
-				
+					has3d = hasMatrix && 'm11' in new WebKitCSSMatrix(),
+					simID = 0,
+					simY = 0,
+					simTime = 0,
+					simDuration = 0;
+
 				// Keep bottom of scroll area at the bottom on resize
 				var update = this.update = function() {
 					height = $this.height();
@@ -75,19 +80,43 @@
 					'-webkit-transform': cssTranslate(scrollY)});
 				
 				// Listen for screen size change event
-				window.addEventListener('onorientationchange' in window ? 'orientationchange' : 'resize', update, false);
+				window.addEventListener('onorientationchange' in window ? 'orientationchange' : 'resize', resized, false);
 				
 				// Listen for touch events
 				$this.bind('touchstart.touchScroll', touchStart);
 				$this.bind('touchmove.touchScroll', touchMove);
 				$this.bind('touchend.touchScroll touchcancel.touchScroll', touchEnd);
 				$this.bind('webkitTransitionEnd.touchScroll', transitionEnd);
-				
+
 				// Set the position of the scroll area using transform CSS
+				function notifyScroll()
+				{
+					var t = new Date().getTime();
+					var k = Math.min(1, (t-simTime) / simDuration);
+					if (k < 1) simID = setTimeout(notifyScroll, 10);
+					options.onScroll(-(simY + (scrollY-simY) * (--k * k * k + 1)), -maxHeight, height);
+				}
+
 				var setPosition = this.setPosition = function(y) {
+					simY = scrollY;
 					scrollY = y;
 					$this.css('-webkit-transform', cssTranslate(scrollY));
+
+					if (options.onScroll)
+					{
+						clearInterval(simID);
+						if (simDuration !== '0') {
+							simTime = new Date().getTime();
+							simID = setTimeout(notifyScroll, 10);
+						}
+						else options.onScroll(-y, -maxHeight, height);
+					}
 				};
+
+				function resized() {
+					update();
+					if (options.onScroll) options.onScroll(-scrollY, -maxHeight, height);
+				}
 				
 				// Transform using a 3D translate if available
 				function cssTranslate(y) {
@@ -97,6 +126,7 @@
 				// Set CSS transition time
 				function setTransitionTime(time) {
 					time = time || '0';
+					simDuration = time;
 					$this.css('-webkit-transition-duration', time + 'ms');
 				}
 
