@@ -13,6 +13,7 @@
 		momentumTime: 300,
 		iPadMomentumDamp: 0.95,
 		iPadMomentumTime: 1200,
+		maxSpeed: 2000,
 		touchTags: ['select', 'input', 'textarea'],
 		onScroll:null
 	};
@@ -50,7 +51,10 @@
 					simID = 0,
 					simY = 0,
 					simTime = 0,
-					simDuration = 0;
+					simDuration = 0,
+					//simEasing = $.easing["easeOutQuad"],
+					maxSpeed = o.maxSpeed,
+					isFixed = false;
 
 				// Keep bottom of scroll area at the bottom on resize
 				var update = this.update = function() {
@@ -87,6 +91,12 @@
 				$this.bind('touchmove.touchScroll', touchMove);
 				$this.bind('touchend.touchScroll touchcancel.touchScroll', touchEnd);
 				$this.bind('webkitTransitionEnd.touchScroll', transitionEnd);
+				if (o.listen)
+				{
+					o.listen.bind('touchstart.touchScroll', touchStart);
+					o.listen.bind('touchmove.touchScroll', touchMove);
+					o.listen.bind('touchend.touchScroll touchcancel.touchScroll', touchEnd);
+				}
 
 				// Set the position of the scroll area using transform CSS
 				function notifyScroll()
@@ -94,10 +104,18 @@
 					var t = new Date().getTime();
 					var k = Math.min(1, (t-simTime) / simDuration);
 					if (k < 1) simID = setTimeout(notifyScroll, 10);
-					options.onScroll(-(simY + (scrollY-simY) * (--k * k * k + 1)), -maxHeight, height);
+					var scroll = simY + (scrollY-simY) * (--k * k * k + 1);
+					options.onScroll(-scroll, -maxHeight, height);
 				}
 
-				var setPosition = this.setPosition = function(y) {
+				var setPosition = this.setPosition = function(y, time, easing) 
+				{
+					if (time) 
+					{
+						setTransitionTime(time);
+						//simEasing = $.easing[easing || "easeOutQuad"];
+					}
+
 					simY = scrollY;
 					scrollY = y;
 					$this.css('-webkit-transform', cssTranslate(scrollY));
@@ -114,8 +132,10 @@
 				};
 
 				function resized() {
-					update();
-					if (options.onScroll) options.onScroll(-scrollY, -maxHeight, height);
+					setTimeout(function() {
+						update();
+						if (options.onScroll) options.onScroll(-scrollY, -maxHeight, height);						
+					}, 1);
 				}
 				
 				// Transform using a 3D translate if available
@@ -145,6 +165,20 @@
 				// Expose getPosition API
 				this.getPosition = function() {
 					return getPosition();
+				};
+
+				// Expose speed limit API
+				this.setSpeed = function(s) {
+					maxSpeed = isNaN(s) ? defaults.maxSpeed : s;
+				};
+
+				this.fixScroll = function() {
+					isFixed = true;
+					scrolling = false;
+				};
+
+				this.freeScroll = function() {
+					isFixed = false;
 				};
 
 				// Bounce back to the bounds after momentum scrolling
@@ -291,8 +325,11 @@
 					e.preventDefault();
 					e.stopPropagation();
 					
+					// disabled
+					if (maxSpeed == 0 || isFixed) return;
+
 					var touch = getTouches(e)[0];
-					
+
 					// Dispatch a fake mouse down event		
 					dispatchMouseEvent('mousedown', touch, getRootNode(touch.target));
 					
@@ -301,6 +338,7 @@
 					movedY = 0;
 					
 					clearTimeout(timeoutID);
+					clearInterval(simID);
 					setTransitionTime(0);
 					
 					// Check scroll position
@@ -357,7 +395,7 @@
 							reboundScroll();
 						} else if (o.momentum) {
 							// Free scroll with momentum
-							momentumScroll(movedY, isiPad ? o.iPadMomentumDamp : o.momentumDamp, 40, 2000, isiPad ? o.iPadMomentumTime : o.momentumTime);
+							momentumScroll(movedY, isiPad ? o.iPadMomentumDamp : o.momentumDamp, 40, maxSpeed, isiPad ? o.iPadMomentumTime : o.momentumTime);
 						}			
 					} else {
 						var touch = getTouches(e)[0],
@@ -374,21 +412,45 @@
 		
 		update: function() {
 			return this.each(function() {
-				this.update();
+				if (this.update)
+					this.update();
 			});
 		},
 		
 		getPosition: function() {
 			var a = [];
 			this.each(function() {
-				a.push(-this.getPosition());
+				if (this.getPosition)
+					a.push(-this.getPosition());
 			});
 			return a;
 		},
 		
-		setPosition: function(y) {
+		setPosition: function(y, time, easing) {
 			return this.each(function() {
-				this.setPosition(-y);
+				if (this.setPosition)
+					this.setPosition(-y, time, easing);
+			});
+		},
+
+		setSpeed: function(s) {
+			return this.each(function() {
+				if (this.setSpeed)
+					this.setSpeed(s);
+			});
+		},
+
+		fixScroll: function() {
+			return this.each(function() {
+				if (this.fixScroll)
+					this.fixScroll();
+			});
+		},
+
+		freeScroll: function() {
+			return this.each(function() {
+				if (this.freeScroll)
+					this.freeScroll();
 			});
 		}
 		
