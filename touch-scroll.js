@@ -108,13 +108,9 @@
 					options.onScroll(-scroll, -maxHeight, height);
 				}
 
-				var setPosition = this.setPosition = function(y, time, easing) 
+				var setPosition = this.setPosition = function(y, time) 
 				{
-					if (time) 
-					{
-						setTransitionTime(time);
-						//simEasing = $.easing[easing || "easeOutQuad"];
-					}
+					if (time) setTransitionTime(time);
 
 					simY = scrollY;
 					scrollY = y;
@@ -426,10 +422,10 @@
 			return a;
 		},
 		
-		setPosition: function(y, time, easing) {
+		setPosition: function(y, time) {
 			return this.each(function() {
 				if (this.setPosition)
-					this.setPosition(-y, time, easing);
+					this.setPosition(-y, time);
 			});
 		},
 
