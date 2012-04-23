@@ -33,11 +33,21 @@ Make sure your code uses the same base CSS as provided in these examples.
 
 `$('nav').touchScroll({touchTags: ['a']}); // Allow the 'a' tag to receive touch events`
 
+`$('nav').touchScroll({ onScroll:scrollCallback }); // Continuous scroll notification (scroll, maxScroll, viewHeight)`
+
 `$('nav').touchScroll('update'); // Refresh the touch-scroll area if content has changed`
 
 `$('nav').touchScroll('setPosition', 100); // Method to set the content vertical scroll position at any time`
 
+`$('nav').touchScroll('setPosition', 100, 1200); // Animate the scroll position in X ms`
+
 `var scrollY = $('nav').touchScroll('getPosition'); // Returns the current vertical scroll position in pixels`
+
+`$('nav').touchScroll('setSpeed', 600); // Limit scrolling speed`
+
+`$('nav').touchScroll('fixScroll'); // Disable touch scrolling`
+
+`$('nav').touchScroll('freeScroll'); // Re-enable touch scrolling`
 
 
 ## License
